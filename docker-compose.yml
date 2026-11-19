@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-lapor}
       POSTGRES_DB: ${DB_NAME:-lapor_kampus}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -19,10 +19,10 @@ services:
       retries: 10
 
   mongo:
-    image: mongo:7
+    image: mongo:9.0
     container_name: lapor-kampus-mongo
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - mongo_data:/data/db
     healthcheck:
@@ -37,7 +37,7 @@ services:
     container_name: lapor-kampus-redis
     command: ["redis-server", "--appendonly", "yes"]
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -45,6 +45,62 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  # Profil "app" menjalankan aplikasi di dalam Docker. Default `make up`
+  # hanya menyalakan infrastruktur agar kode dapat dijalankan dari host.
+  api:
+    profiles: ["app"]
+    build:
+      context: .
+      args:
+        VERSION: ${VERSION:-dev}
+        COMMIT: ${COMMIT:-none}
+    container_name: lapor-kampus-api
+    env_file: .env
+    environment:
+      APP_ROLE: api
+      DB_HOST: postgres
+      DB_PORT: 5432
+      MONGO_URI: mongodb://mongo:27017
+      REDIS_ADDR: redis:6379
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker:
+    profiles: ["app"]
+    build:
+      context: .
+      args:
+        VERSION: ${VERSION:-dev}
+        COMMIT: ${COMMIT:-none}
+    container_name: lapor-kampus-worker
+    # Worker tidak membuka HTTP, jadi healthcheck HTTP dari Dockerfile
+    # tidak berlaku untuk container ini.
+    healthcheck:
+      disable: true
+    env_file: .env
+    environment:
+      APP_ROLE: worker
+      DB_HOST: postgres
+      DB_PORT: 5432
+      MONGO_URI: mongodb://mongo:27017
+      REDIS_ADDR: redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres_data:

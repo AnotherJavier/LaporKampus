@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS ticket_outbox;
+DROP TABLE IF EXISTS tickets;
+DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS refresh_tokens;
+DROP TABLE IF EXISTS users;
