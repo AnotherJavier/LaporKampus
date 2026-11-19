@@ -62,9 +62,9 @@ func newErrorHandler(logger *slog.Logger) fiber.ErrorHandler {
 		}
 
 		return c.Status(status).JSON(fiber.Map{
-			"success":   false,
-			"code":      code,
-			"message":   message,
+			"success":    false,
+			"code":       code,
+			"message":    message,
 			"request_id": requestID,
 		})
 	}
