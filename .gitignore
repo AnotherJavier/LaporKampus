@@ -1,3 +1,25 @@
 # environment
 .env
-/logs
+.env.*
+!.env.example
+
+# logs & build
+/logs/*
+!/logs/.gitkeep
+/bin/
+dist/
+*.exe
+
+# test & coverage
+coverage.out
+coverage.html
+*.test
+
+# editor & OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# tooling cache
+.golangci-lint/
