@@ -1,0 +1,7 @@
+\usepackage{newunicodechar}
+\newfontfamily\symbolfont{DejaVu Sans}
+\newunicodechar{✓}{{\symbolfont\char"2713}}
+\usepackage{etoolbox}
+\AtBeginEnvironment{longtable}{\small}
+\usepackage{fvextra}
+\DefineVerbatimEnvironment{verbatim}{Verbatim}{breaklines=true,breakanywhere=true,fontsize=\footnotesize}
